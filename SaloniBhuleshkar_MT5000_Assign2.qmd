@@ -1,0 +1,158 @@
+---
+title: "Hidden costs of conflict and inflation- unequal access to child healthcare"
+subtitle: "MT5000 Data Analytics and Story Telling"
+author: "Saloni Bhuleshkar"
+format:
+  html:
+    toc: true
+    theme: cyborg
+    backgroundcolor: black
+    
+execute: 
+  echo: false
+  warning: false
+  message: false
+---
+
+Child mortality rates serve as barometer of global health and societal well-being. Furthermore, diarrhoea is one of the global top killers in children aged under five; it is more frequent in low-income countries where the resources are scarce. This is quite a horrifying and unacceptable practice in today's time. Here, the report digs out causes of children's mortality from diarrhoea. Moreover, it also presents an action plan to be taken by the global community.
+
+```{r}
+# Display code
+library(dplyr)
+library(tidyverse)
+library (plotly)
+metadata <- read.csv("C:/Users/Ash/Desktop/Sal/metadata.csv")
+indicator2 <- read.csv("C:/Users/Ash/Desktop/Sal/indicator_2.csv")
+
+#2019
+metadata2019 <- metadata %>%
+  filter(year == 2019)
+indic2019 <- indicator2 %>%
+  filter(year == 2019)
+joined2 <- full_join(metadata, indicator2, join_by(country))
+joined2019 <- full_join(metadata2019, indic2019, join_by(country))
+
+#World map
+map_world <- map_data("world")
+
+
+worldmap_joined <- full_join(joined2019, map_world, by = c("country" = "region"))
+
+
+map1 <- ggplot(worldmap_joined) +
+  aes(x = long, y = lat, group = group, fill = Diarrhoea.treatment) +
+  geom_polygon(color = "black", size = 0.2) +
+  scale_fill_gradient2(low = "red", mid = "yellow", high = "green", midpoint = 50, name = "Diarrhoea Treatment") +
+  labs(title = "World Map with Diarrhoea Treatment Data",
+       x = "", y = "") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  coord_fixed()
+ggplotly (map1)
+```
+
+## Understanding the causes
+
+A complex interplay of factors contributes to child mortality from diarrhoea, including:\
+
+• **Poverty and Healthcare Inequity**: The poorest population segments are often most critically affected by limits of availability of basic healthcare services, clean water, and sanitation.
+
+• **Political Instability**: Warfare areas face a breakdown of the health care system, and problems with the delivery of essential treatments and preventive care are being solved.
+
+• **Resource Misallocation**: Based on the epidemiological analysis, it is obvious that those states diverting the greatest funds for the military instead of for healthcare; the childhood health will be undone.
+
+•**Economic Hardship**: Inflation invariably shrinks affordable external healthcare assistance and dilates supply problems in disease management centers.
+
+*The following graph shows relation of GDP and diarrhoea treatment-*\
+
+\
+
+```{r}
+high_diarrhea_treatment <- joined2 %>%
+  filter(Diarrhoea.treatment > 15)
+
+high_diarrhea_treatment2<- joined2019 %>%
+  filter(Diarrhoea.treatment > 10)
+
+#Bar
+ggplot(high_diarrhea_treatment,aes(x = reorder(country, GDP.per.capita..constant.2015.US..), y = GDP.per.capita..constant.2015.US.., fill = Diarrhoea.treatment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_gradient(low = "red", high = "green", name = "Diarrhoea Treatment") +
+  labs(title = "GDP v/s Diarrhoea Treatment",
+       x = "Country",
+       y = "GDP Expenditure") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+```
+
+*The following graph shows relation of Military expenditure and diarrhoea treatment-*
+
+```{r}
+#Scatter
+scatter1 <- ggplot(data = high_diarrhea_treatment2,aes(x = Military.expenditure....of.GDP., y = Diarrhoea.treatment)) +
+  geom_point(size = 3, shape = 21, fill = "purple", color = "black") +
+  labs(title = "Military Expenditure v/s Diarrhoea Treatment",
+       x = "Military Expenditure",
+       y = "Diarrhoea Treatment") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed")
+ggplotly(scatter1)
+```
+
+## 
+
+## **Impact on Treatment**
+
+The case of diarrhoea treatment offers clear insights into these crises: The case of diarrhoea treatment offers clear insights into these crises:\
+\
+• **Accessibility vs.Affordability:** Alongside ORS and zinc, their effectiveness and low cost, economic fluctuations still happen which make them unreachable for people most likely to need them.\
+\
+• **Fragile Supply Chains**: Price inflation is undermining the stability of logistics networks that have become critical for getting life-supporting drugs and treatments to patients.
+
+*The following graph shows major African countries and their relationship of inflation and treatment-*
+
+```{r}
+#Time series Chart
+# Top 5 African countries
+
+selected_countries <- c("Chad", "Central African Republic", "Senegal", "Zambia", "Zimbabwe")
+filtered_data <- joined2[joined2$country %in% selected_countries, ]
+
+timeseries <- filtered_data %>%
+  ggplot(aes(x = year.x, y = Inflation..consumer.prices..annual..., color = country)) +
+  geom_line(size = 1.2) +
+  labs(title = "Inflation and treatment",
+       x = "Year",
+       y = "Inflation rate",
+       color = "Country") +
+  theme_minimal() +
+  theme(legend.title = element_text(face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_x_continuous(breaks = seq(1960, 2020, by = 5)) +
+          scale_y_continuous(limits = c(0, 50))
+
+ggplotly(timeseries)
+```
+
+## Recommendations
+
+1.  **Invest in Healthcare:** Put special attention in sustainable funding for different primary care - clinics and essential supplies as well as the marginalized populations.
+
+2.  **Water & Sanitation Emphasis:** Eradicating the epidemic at the root cause involves a provision of clean water and better sanitation.
+
+3.  **Advocate for Peace:** Try your best to abolish the conflict and provide the cures as well as health facilities for restoring.
+
+4.  **Promote Healthcare-Focused Budgets:** Try to involve change in local budget, mostly health, education and welfare improvement.
+
+    \
+    ![](WhatsApp Image 2024-04-25 at 01.11.21_4e41b8a5.jpg)
+
+    #### **The last thing any kid should worry about is their potential-early demise. Every kid should have a fair chance of living a long and healthy life Placing the health of children as a top priority may be an obvious embodiment of what we consider as important to vulnerable people Through community partnerships, grants, and soft loans we will help people to not only achieve their goals but also leave a legacy for generations. Let us use those numbers to awaken compassion and spur intervention that no longer allows infectious diseases such as diarrhoea to claim more precious lives which can be saved.**
+
+    \
